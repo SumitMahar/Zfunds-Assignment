@@ -7,7 +7,7 @@ To set up this project, follow these steps:
 1. Clone the repository:
    ```bash
    git clone https://github.com/yourusername/yourrepository.git
-   ```
+   ```bash
    cd Zfunds-Assignment
    ```python
    python3 -m pip install -r requirements.txt
