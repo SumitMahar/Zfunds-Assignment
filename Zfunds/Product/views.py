@@ -4,14 +4,15 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
-from Zfunds.Accounts.models import CustomUser
+from Zfunds.Accounts.models import CustomUser, Advisor
+from rest_framework.authentication import TokenAuthentication
 
 from .models import Product, Category, Order
 from .serializers import ProductSerializer, CategorySerializer
 
 class ProductView(APIView):
     """
-    ViewSet for viewing and creating Products
+    View for viewing and creating Products by Admin
     """
     permission_classes = [permissions.IsAdminUser]
 
@@ -51,13 +52,29 @@ class ProductView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class PurchaseProductView(APIView):
+    """
+        View for Purchasing Products
+    """
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_unique_link(self, request, product, order, user):
+        host = request.get_host()
+
+        unique_link = f"{host}/purchase-details/{product.id}{order.id}{user.id}"
+        return unique_link
+
     def post(self, request):
-        advisor = request.user  # Assuming the advisor is the authenticated user
-        client_id = request.data.get('client_id')
+        user = request.user 
+
+        # if the user is advisor then request data should contain client name, mobile, and product id
         product_id = request.data.get('product_id')
+        client_name = request.data.get('name')
+        client_mobile = request.data.get('mobile')
 
         try:
-            client = CustomUser.objects.get(id=client_id, client_advisor=advisor)
+            adv = Advisor.objects.get(user_profile=user)
+            client = CustomUser.objects.get(mobile=client_mobile, client_advisor=adv)
             product = Product.objects.get(id=product_id)
         except CustomUser.DoesNotExist:
             return Response({'message': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
@@ -65,10 +82,14 @@ class PurchaseProductView(APIView):
             return Response({'message': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
 
         # Create an order record
-        order = Order.objects.create(advisor=advisor, client=client, product=product)
+        order = Order.objects.create(advisor=adv, client=client, product=product)
+        unique_link = self.get_unique_link(request, product, order, user)
+        order.unique_link = unique_link
+        order.save()
+        msg = "Product purchased successfully"
+        
+        if(user.is_advisor):
+            msg = "Product purchased successfully for client"
 
-        # You can save the purchase details or send the unique link to the client as needed
-
-        return Response({'message': 'Product purchased successfully', 'order_id': order.id}, status=status.HTTP_201_CREATED)
+        return Response({'message': msg, 'unique_link': unique_link}, status=status.HTTP_201_CREATED)
  
-    
