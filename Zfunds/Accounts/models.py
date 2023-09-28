@@ -6,7 +6,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
 
-
 class CustomUserManager(BaseUserManager):
     def create_user(self, mobile, role, otp=None, **kwargs):
         if not mobile:
@@ -43,10 +42,13 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     mobile = models.CharField(max_length=15, unique=True)
     otp = models.CharField(max_length=6, null=True)
     role = models.CharField(max_length=10)  # 'advisor' or 'user'
+    client_advisor = models.ForeignKey("Advisor", blank=True, null=True, on_delete=models.SET_NULL, related_name="clients")
+
     is_active = models.BooleanField(default=True)
     is_advisor = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
+
 
     objects = CustomUserManager()
 
@@ -57,9 +59,20 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
         # Dummy logic for OTP verification
         return self.otp == otp
 
+    class Meta:
+        db_table = "user"
+
     def __str__(self):
         return self.mobile
 
+class Advisor(models.Model):
+    user_profile = models.OneToOneField("CustomUser", on_delete=models.CASCADE)
+
+    class Meta:
+        db_table = "advisor"
+
+    def __str__(self):
+        return f"Advisor : {self.user_profile.mobile}"
 
 
 @receiver(post_save, sender=settings.AUTH_USER_MODEL)
