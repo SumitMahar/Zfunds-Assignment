@@ -100,14 +100,15 @@ class AdvisorClientsView(APIView):
 
         advisor = None 
         try:
-            advisor = Advisor.objects.get(user_profile=request.user)
-        except:
+            advisor = Advisor.objects.get(user_profile_id=pk)
+        except Exception as e:
             return Response({"Message": f"Advisor with id {pk} does not exist"})
         
         if(advisor):
             # get all the clients for an advisor and send as response
             clients = [UserSerializer(user).data for user in advisor.clients.all()]
-            print("******", clients)
+            for c in clients:
+                c.pop("password")
             return Response({"clients": clients})
 
 

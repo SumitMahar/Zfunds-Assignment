@@ -4,8 +4,9 @@ from rest_framework.response import Response
 from rest_framework import permissions
 from rest_framework import status
 from drf_spectacular.utils import extend_schema
+from Zfunds.Accounts.models import CustomUser
 
-from .models import Product, Category
+from .models import Product, Category, Order
 from .serializers import ProductSerializer, CategorySerializer
 
 class ProductView(APIView):
@@ -49,5 +50,25 @@ class ProductView(APIView):
         
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    
+class PurchaseProductView(APIView):
+    def post(self, request):
+        advisor = request.user  # Assuming the advisor is the authenticated user
+        client_id = request.data.get('client_id')
+        product_id = request.data.get('product_id')
+
+        try:
+            client = CustomUser.objects.get(id=client_id, client_advisor=advisor)
+            product = Product.objects.get(id=product_id)
+        except CustomUser.DoesNotExist:
+            return Response({'message': 'Client not found'}, status=status.HTTP_404_NOT_FOUND)
+        except Product.DoesNotExist:
+            return Response({'message': 'Product not found'}, status=status.HTTP_404_NOT_FOUND)
+
+        # Create an order record
+        order = Order.objects.create(advisor=advisor, client=client, product=product)
+
+        # You can save the purchase details or send the unique link to the client as needed
+
+        return Response({'message': 'Product purchased successfully', 'order_id': order.id}, status=status.HTTP_201_CREATED)
+ 
     
