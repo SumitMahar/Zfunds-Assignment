@@ -6,7 +6,7 @@ To set up this project, follow these steps:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/yourrepository.git
+   git clone https://github.com/SumitMahar/Zfunds-Assignment.git
 
    cd Zfunds-Assignment
 
