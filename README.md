@@ -15,5 +15,5 @@ To set up this project, follow these steps:
 2. Check out Documentation for endpoints
    ```bash
    visit http://127.0.0.1:8000/api/docs
-![Alt Text]([https://github.com/username/repository/raw/main/path/to/your/image.png](https://github.com/SumitMahar/Zfunds-Assignment/blob/master/Screenshot%202023-09-28%20at%2010.45.17%20AM.png)https://github.com/SumitMahar/Zfunds-Assignment/blob/master/Screenshot%202023-09-28%20at%2010.45.17%20AM.png)
+![Alt Text]((https://github.com/SumitMahar/Zfunds-Assignment/blob/master/Screenshot%202023-09-28%20at%2010.45.17%20AM.png)https://github.com/SumitMahar/Zfunds-Assignment/blob/master/Screenshot%202023-09-28%20at%2010.45.17%20AM.png)
 
